@@ -1,0 +1,3 @@
+{
+    "#test": {"type": "message equal", "value": "oi"}
+}

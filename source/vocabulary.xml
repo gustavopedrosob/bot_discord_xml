@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<events>
+    <on_message>
+        <message>Testing</message>
+        <message>Hello</message>
+    </on_message>
+</events>
