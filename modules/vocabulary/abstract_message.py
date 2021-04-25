@@ -11,6 +11,7 @@ class AbstractMessage(BaseElement):
     CONSEQUENCES = [BAN, KICK]
     PUBLIC = "public"
     PRIVATE = "private"
+    BOTH_PLACES = "both_places"
     PLACES = [PUBLIC, PRIVATE]
     ID = "id"
     CLASS = "class"
@@ -44,7 +45,7 @@ class AbstractMessage(BaseElement):
             self.delay = 0
         where = element.attrib.get(self.WHERE)
         if where:
-            assert where in "The \"where\" attribute need to be \"private\" or \"public\"."
+            assert where in "The \"where\" attribute need to be \"private\", \"public\" or \"both_places\"."
             self.where = where
         else:
             self.where = inherited_arguments[self.WHERE]
@@ -79,11 +80,16 @@ class AbstractMessage(BaseElement):
                 await sleep(self.delay) if self.delay else None
                 for emote in self.emotes_author:
                     await message.add_reaction(emote)
-                channel = await message.author.create_dm() if self.where == self.PRIVATE else message.channel
                 text = self.format_to_send(message)
-                message_sent = await channel.send(text)
-                for emote in self.emotes_bot:
-                    await message_sent.add_reaction(emote)
+                if self.where == self.PRIVATE or self.where == self.BOTH_PLACES:
+                    channel = await message.author.create_dm()
+                    message_sent = await channel.send(text)
+                    for emote in self.emotes_bot:
+                        await message_sent.add_reaction(emote)
+                if self.where == self.PUBLIC or self.where == self.BOTH_PLACES:
+                    message_sent = await message.channel.send(text)
+                    for emote in self.emotes_bot:
+                        await message_sent.add_reaction(emote)
 
     @staticmethod
     def get_emotes(emotes: str) -> str:

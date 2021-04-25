@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <events>
     <on_message>
-        <message>Testing</message>
+        <message where="both_places">Testing</message>
         <message>Hello</message>
         <random_message get="3">
             <answer>Good night!</answer>
