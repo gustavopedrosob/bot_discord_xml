@@ -3,5 +3,10 @@
     <on_message>
         <message>Testing</message>
         <message>Hello</message>
+        <random_message get="3">
+            <answer>Good night!</answer>
+            <answer>Good morning!</answer>
+            <answer>Good day!</answer>
+        </random_message>
     </on_message>
 </events>

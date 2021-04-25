@@ -5,7 +5,7 @@ from discord import Message
 
 
 class AbstractMessage(BaseElement):
-    ANSWER = "ANSWER"
+    ANSWER = "answer"
     BAN = "ban"
     KICK = "kick"
     CONSEQUENCES = [BAN, KICK]
@@ -21,26 +21,33 @@ class AbstractMessage(BaseElement):
     CONSEQUENCE = "consequence"
     ATTRS = [ID, CLASS, WHERE, DELAY, EMOTES_BOT, EMOTES_AUTHOR, CONSEQUENCE]
 
-    def __init__(self, element: Element, where: str, condition: Condition, conditions: ConditionsJson):
-        from modules.assertion import assert_string_in_list, assert_to_entire_number
-        super().__init__(element, self.ATTRS)
-        self.condition = condition
-        self.reply = ""
+    def __init__(self, element: Element, conditions: ConditionsJson, inherited_arguments: dict):
+        super().__init__(element)
+        for key, value in inherited_arguments.items():
+            self.__setattr__(key, value)
+        self.reply = element.text
         consequence = element.attrib.get(self.CONSEQUENCE)
-        self.consequence = assert_string_in_list(
-            consequence, "The \"consequence\" attribute need to be \"ban\" or \"kick\".", self.CONSEQUENCES) \
-            if consequence else ""
+        if consequence:
+            assert consequence in self.CONSEQUENCE, "The \"consequence\" attribute need to be \"ban\" or \"kick\"."
+            self.consequence = consequence
+        else:
+            self.consequence = None
         emotes_bot = element.attrib.get(self.EMOTES_BOT)
         self.emotes_bot = self.get_emotes(emotes_bot) if emotes_bot else ""
         emotes_author = element.attrib.get(self.EMOTES_AUTHOR)
         self.emotes_author = self.get_emotes(emotes_author) if emotes_author else ""
-        delay = element.attrib.get(self.DELAY, "")
-        self.delay = assert_to_entire_number(delay, "The \"delay\" attribute need to be a entire number.") \
-            if delay else 0
-        where_attr = element.attrib.get(self.WHERE)
-        self.where = assert_string_in_list(
-            where_attr.lower(), "The \"where\" attribute need to be \"private\" or \"public\".", self.PLACES) \
-            if where_attr else where
+        delay = element.attrib.get(self.DELAY)
+        if delay:
+            assert delay.isdigit(), "The \"delay\" attribute need to be a entire number."
+            self.delay = int(delay)
+        else:
+            self.delay = 0
+        where = element.attrib.get(self.WHERE)
+        if where:
+            assert where in "The \"where\" attribute need to be \"private\" or \"public\"."
+            self.where = where
+        else:
+            self.where = inherited_arguments[self.WHERE]
         _class = element.attrib.get(self.CLASS)
         _id = element.attrib.get(self.ID)
         if _class and _id:
@@ -49,6 +56,8 @@ class AbstractMessage(BaseElement):
             self.condition = conditions.get_condition("." + _class)
         elif _id:
             self.condition = conditions.get_condition("#" + _id)
+        else:
+            self.condition = inherited_arguments["condition"]
 
     def format_to_send(self, message: Message) -> str:
         from datetime import datetime
@@ -71,7 +80,8 @@ class AbstractMessage(BaseElement):
                 for emote in self.emotes_author:
                     await message.add_reaction(emote)
                 channel = await message.author.create_dm() if self.where == self.PRIVATE else message.channel
-                message_sent = await channel.send(self.format_to_send(message))
+                text = self.format_to_send(message)
+                message_sent = await channel.send(text)
                 for emote in self.emotes_bot:
                     await message_sent.add_reaction(emote)
 
