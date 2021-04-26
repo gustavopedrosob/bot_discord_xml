@@ -1,3 +1,4 @@
 {
-    "#test": {"type": "message equal", "value": "hello"}
+    "#test": {"type": "message equal", "value": "hello"},
+    ".testing": ["#test", {"type": "channel name equal", "value": "test-bot"}]
 }

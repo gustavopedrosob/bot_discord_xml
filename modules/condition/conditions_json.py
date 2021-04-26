@@ -24,15 +24,15 @@ class ConditionsJson:
 
     def get_condition(self, name: str):
         from modules.condition import ConditionBase
-        class_or_id = ConditionBase.is_class_or_id(name)
+        get_mode = ConditionBase.get_mode(name)
         condition = self.conditions.get(name)
-        if class_or_id == "id" and condition and name in self.used_id:
+        if get_mode == "id" and condition and name in self.used_id:
             raise SyntaxError(f"The id \"{name}\" cant be used more than 1 time!")
         elif condition:
             return condition
-        elif not condition and class_or_id == "id":
+        elif not condition and get_mode == "id":
             raise NameError(f"Id \"{name}\" not exists!")
-        elif not condition and class_or_id == "class":
+        elif not condition and get_mode == "class":
             raise ValueError(f"Class \"{name}\" not exists!")
         else:
             raise ValueError(f"Invalid name \"{name}\" it need has \".\" or \"#\" at start of the word.")

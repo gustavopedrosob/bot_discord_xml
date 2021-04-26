@@ -24,8 +24,6 @@ class AbstractMessage(BaseElement):
 
     def __init__(self, element: Element, conditions: ConditionsJson, inherited_arguments: dict):
         super().__init__(element)
-        for key, value in inherited_arguments.items():
-            self.__setattr__(key, value)
         self.reply = element.text
         consequence = element.attrib.get(self.CONSEQUENCE)
         if consequence:

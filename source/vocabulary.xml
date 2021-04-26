@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <events>
     <on_message>
-        <message where="both_places">Testing</message>
+        <message class="testing" where="public">
+            <answer>ball</answer>
+            <answer>youtube</answer>
+            <answer>rocket league</answer>
+        </message>
         <message>Hello</message>
-        <random_message get="3">
+        <random_message get="1">
             <answer>Good night!</answer>
             <answer>Good morning!</answer>
             <answer>Good day!</answer>

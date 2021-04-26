@@ -8,5 +8,5 @@ class AbstractMultipleMessage(AbstractMessage):
         from modules.vocabulary import Reply
         super().__init__(element, conditions, inherited_arguments)
         answers = list(element.findall("./"))
-        self.answers = [Reply(element, conditions, inherited_arguments) for element in answers
+        self.answers = [Reply(element, conditions, dict(where=self.where, condition=self.condition)) for element in answers
                         if element.tag.lower() == self.ANSWER]

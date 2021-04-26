@@ -15,6 +15,8 @@ class Condition(ConditionBase):
         "name not equal": lambda self, arg: not self.__base_compare(arg.author.display_name, self.value, eq),
         "guild name equal": lambda self, arg: self.__base_compare(arg.guild.name, self.value, eq),
         "guild name not equal": lambda self, arg: not self.__base_compare(arg.guild.name, self.value, eq),
+        "channel name equal": lambda self, arg: self.__base_compare(arg.channel.name, self.value, eq),
+        "channel name not equal": lambda self, arg: not self.__base_compare(arg.channel.name, self.value, eq),
         "message startswith": lambda self, arg: self.__base_compare(arg.content, self.value, str.startswith),
         "message not startswith": lambda self, arg: not self.__base_compare(arg.content, self.value, str.startswith),
         "name startswith": lambda self, arg: self.__base_compare(arg.author.display_name, self.value, str.startswith),
@@ -50,14 +52,14 @@ class Condition(ConditionBase):
             if attr not in self.ATTRS:
                 raise SyntaxError(f"Invalid condition attribute \"{attr}\".")
         if self.type not in self.TYPES:
-            raise ValueError(f"Type {self.type} not exists!")
+            raise ValueError(f"Type \"{self.type}\" not exists!")
         if isinstance(self.flags, list):
             for self.flag in self.flags:
                 if self.flag not in self.FLAGS:
-                    raise ValueError(f"Flag {self.flags} not exists")
+                    raise ValueError(f"Flag \"{self.flags}\" not exists")
         elif isinstance(self.flags, str):
             if self.flags not in self.FLAGS:
-                raise ValueError(f"Flag {self.flags} not exists")
+                raise ValueError(f"Flag \"{self.flags}\" not exists")
         elif self.flags is None:
             pass
         else:

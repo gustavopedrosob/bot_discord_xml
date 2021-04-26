@@ -1,10 +1,12 @@
 class ConditionBase:
-    def __init__(self, name: str):
+    def __init__(self, name: str or None = None):
         self.name = name
-        self.class_or_id = ConditionBase.is_class_or_id(self.name)
 
+    
     @staticmethod
-    def is_class_or_id(name: str):
+    def get_mode(name: str or None):
+        if name is None:
+            return "anonymous"
         if name.startswith("."):
             return "class"
         elif name.startswith("#"):

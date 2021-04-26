@@ -9,12 +9,10 @@ class Conditions(ConditionBase):
         self.conditions = []
         for condition in conditions:
             if isinstance(condition, dict):
-                self.conditions.append(Condition(**condition))
+                self.conditions.append(Condition(None, **condition))
             elif isinstance(condition, str):
                 if condition in conditions_json.conditions:
                     self.conditions.append(conditions_json.conditions[condition])
-                # elif condition in condition.content.keys():
-                #     raise error
                 else:
                     raise NameError(f"Condition \"{condition}\" is not defined or referred before exists.")
 
