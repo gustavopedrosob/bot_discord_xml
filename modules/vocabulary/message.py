@@ -1,16 +1,21 @@
-from xml.etree.ElementTree import Element
-from modules.condition import Condition, ConditionsJson
+from modules.vocabulary.attributes_message import AttributesMessage
 from discord import Message as DMessage
-from modules.vocabulary.abstract_multiple_message import AbstractMultipleMessage
+from modules.vocabulary.abstract_message import AbstractMessage
+from xml.etree.ElementTree import Element
+from modules.vocabulary.answer import Answer
 
 
-class Message(AbstractMultipleMessage):
-    def __init__(self, element: Element, conditions: ConditionsJson, inherited_arguments: dict) -> None:
-        super().__init__(element, conditions, inherited_arguments)
+class Message(AbstractMessage):
+    CHILDREN = AttributesMessage.CHILDREN
+    ATTRS = AttributesMessage.ATTRS
+
+    def __init__(self, element: Element):
+        super().__init__(element)
 
     async def send(self, message: DMessage) -> None:
-        if self.answers:
-            for reply in self.answers:
-                await reply.send(message)
+        answers = [child for child in self.children if isinstance(child, Answer)]
+        if answers:
+            for answer in answers:
+                await answer.send(message)
         else:
             await super().send(message)

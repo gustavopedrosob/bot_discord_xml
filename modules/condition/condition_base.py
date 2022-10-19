@@ -1,7 +1,8 @@
+RESPECTIVE_SYMBOLS = {"class": ".", "id": "#"}
+
 class ConditionBase:
     def __init__(self, name: str or None = None):
         self.name = name
-
     
     @staticmethod
     def get_mode(name: str or None):

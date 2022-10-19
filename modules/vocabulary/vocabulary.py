@@ -1,13 +1,14 @@
-class Vocabulary:
+from modules.vocabulary.on_message import OnMessage
+from xml.etree.ElementTree import parse
+from modules.vocabulary.node import Node
+from modules.condition.conditions_json import ConditionsJson
+
+class Vocabulary(Node):
+    CHILDREN = {"on_message": OnMessage}
     FILE = "source/vocabulary.xml"
+    CONDITIONS = ConditionsJson()
 
-    def __init__(self) -> None:
-        from xml.etree.ElementTree import parse
-        from modules.condition import ConditionsJson
-        from modules.vocabulary import OnMessage
+    def __init__(self):
         tree = parse(self.FILE)
-        self.conditions = ConditionsJson()
-        self.on_message_event = OnMessage(tree.find("on_message"), self.conditions)
-
-    def load(self):
-        self.__init__()
+        element = tree.getroot()
+        super().__init__(element)

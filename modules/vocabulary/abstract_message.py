@@ -1,62 +1,13 @@
-from modules.vocabulary.base_element import BaseElement
-from modules.condition import Condition, ConditionsJson
-from xml.etree.ElementTree import Element
+from modules.vocabulary.vocabulary import Vocabulary
+from modules.vocabulary.node import Node
 from discord import Message
+from modules.condition.condition_base import RESPECTIVE_SYMBOLS
+from xml.etree.ElementTree import Element
 
-
-class AbstractMessage(BaseElement):
-    ANSWER = "answer"
-    BAN = "ban"
-    KICK = "kick"
-    CONSEQUENCES = [BAN, KICK]
-    PUBLIC = "public"
-    PRIVATE = "private"
-    BOTH_PLACES = "both_places"
-    PLACES = [PUBLIC, PRIVATE]
-    ID = "id"
-    CLASS = "class"
-    WHERE = "where"
-    DELAY = "delay"
-    EMOTES_BOT = "emotes_bot"
-    EMOTES_AUTHOR = "emotes_author"
-    CONSEQUENCE = "consequence"
-    ATTRS = [ID, CLASS, WHERE, DELAY, EMOTES_BOT, EMOTES_AUTHOR, CONSEQUENCE]
-
-    def __init__(self, element: Element, conditions: ConditionsJson, inherited_arguments: dict):
+class AbstractMessage(Node):
+    def __init__(self, element: Element):
         super().__init__(element)
-        self.reply = element.text
-        consequence = element.attrib.get(self.CONSEQUENCE)
-        if consequence:
-            assert consequence in self.CONSEQUENCE, "The \"consequence\" attribute need to be \"ban\" or \"kick\"."
-            self.consequence = consequence
-        else:
-            self.consequence = None
-        emotes_bot = element.attrib.get(self.EMOTES_BOT)
-        self.emotes_bot = self.get_emotes(emotes_bot) if emotes_bot else ""
-        emotes_author = element.attrib.get(self.EMOTES_AUTHOR)
-        self.emotes_author = self.get_emotes(emotes_author) if emotes_author else ""
-        delay = element.attrib.get(self.DELAY)
-        if delay:
-            assert delay.isdigit(), "The \"delay\" attribute need to be a entire number."
-            self.delay = int(delay)
-        else:
-            self.delay = 0
-        where = element.attrib.get(self.WHERE)
-        if where:
-            assert where in "The \"where\" attribute need to be \"private\", \"public\" or \"both_places\"."
-            self.where = where
-        else:
-            self.where = inherited_arguments[self.WHERE]
-        _class = element.attrib.get(self.CLASS)
-        _id = element.attrib.get(self.ID)
-        if _class and _id:
-            raise SyntaxError("You cant put a class and a id in a element message.")
-        elif _class:
-            self.condition = conditions.get_condition("." + _class)
-        elif _id:
-            self.condition = conditions.get_condition("#" + _id)
-        else:
-            self.condition = inherited_arguments["condition"]
+        self.condition = self.get_condition()
 
     def format_to_send(self, message: Message) -> str:
         from datetime import datetime
@@ -65,6 +16,11 @@ class AbstractMessage(BaseElement):
             guild_name=message.guild.name,
             channel_name=message.channel.name,
             author_name=message.author.display_name)
+
+    def get_condition(self):
+        for type in ["class", "id"]:
+            if type in self.attributes:
+                Vocabulary.CONDITIONS.get_condition(RESPECTIVE_SYMBOLS[type], self.attributes[type])
 
     async def send(self, message: Message):
         from asyncio import sleep
@@ -88,11 +44,3 @@ class AbstractMessage(BaseElement):
                     message_sent = await message.channel.send(text)
                     for emote in self.emotes_bot:
                         await message_sent.add_reaction(emote)
-
-    @staticmethod
-    def get_emotes(emotes: str) -> str:
-        from emoji import emoji_lis
-        emotes = emoji_lis(emotes)
-        if len(emotes) > 24:
-            raise SyntaxError("You cant put more than 24 emotes in a message.")
-        return "".join([emoji["emoji"] for emoji in emotes])
